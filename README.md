@@ -44,9 +44,6 @@ python manage.py createsuperuser
 python manage.py runserver
 ```
 
-- Panel admin: http://127.0.0.1:8000/admin/
-- Inicio del inventario: http://127.0.0.1:8000/
-
 ## Tests
 
 ```bash
