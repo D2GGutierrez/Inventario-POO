@@ -1,5 +1,6 @@
 from django.core.validators import MinValueValidator
-from django.db import models
+from django.db import models, transaction
+
 
 
 class ModeloBase(models.Model):
@@ -71,13 +72,23 @@ class Producto(ModeloBase):
     def requiere_resurtido(self) -> bool:
         return self.stock <= self.stock_minimo
 
+
     def ajustar_stock(self, cantidad: int) -> None:
         nuevo_stock = self.stock + cantidad
-        if nuevo_stock < 0:
-            raise ValueError('El stock no puede quedar en negativo.')
-        self.stock = nuevo_stock
-        self.save(update_fields=['stock', 'actualizado'])
 
+        if nuevo_stock < 0:
+            raise ValueError("El stock no puede quedar en negativo.")
+
+        self.stock = nuevo_stock
+        self.save(update_fields=["stock", "actualizado"])
+
+
+    def registrar_entrada(self, cantidad: int) -> None:
+        self.ajustar_stock(cantidad)
+
+
+    def registrar_salida(self, cantidad: int) -> None:
+        self.ajustar_stock(-cantidad)
 
 class Movimiento(ModeloBase):
     class Tipo(models.TextChoices):
@@ -100,8 +111,16 @@ class Movimiento(ModeloBase):
         return f'{self.tipo} {self.cantidad} x {self.producto.nombre}'
 
     def save(self, *args, **kwargs):
-        es_nuevo = self.pk is None
-        super().save(*args, **kwargs)
-        if es_nuevo:
-            delta = self.cantidad if self.tipo == self.Tipo.ENTRADA else -self.cantidad
-            self.producto.ajustar_stock(delta)
+    
+        with transaction.atomic():
+        
+            es_nuevo = self.pk is None
+    
+            super().save(*args, **kwargs)
+    
+            if es_nuevo:
+            
+                if self.tipo == self.Tipo.ENTRADA:
+                    self.producto.registrar_entrada(self.cantidad)
+                else:
+                    self.producto.registrar_salida(self.cantidad)
