@@ -7,8 +7,31 @@ Sistema de inventario desarrollado con Django (Python 3.13) para la materia de P
 ```
 Inventario-POO/
 ├── config/            # Configuración del proyecto (settings, urls, wsgi/asgi)
-├── inventario/        # App principal: modelos, vistas, admin, tests
-│   └── migrations/
+inventario/
+├── migrations/
+│
+├── models.py          ← entidades + lógica del dominio
+├── views.py           ← CBV
+├── urls.py
+├── admin.py
+├── tests.py
+│
+├── forms.py           ← siguiente expansión interesante
+├── services.py        ← lógica compleja de inventario
+│
+├── templates/
+│   └── inventario/
+│       ├── producto_list.html
+│       ├── producto_detail.html
+│       ├── producto_form.html
+│       ├── movimiento_list.html
+│       └── movimiento_form.html
+│
+└── static/
+    └── inventario/
+        ├── css/
+        └── js/
+├── db.sqlite3
 ├── manage.py
 ├── requirements.txt
 └── README.md
